@@ -9,6 +9,8 @@ const {errorHandler} = require('./middleware/errorHandler')
 app.use(express.json()) ;
 app.use(cors()) ; 
 
+app.use('/auth' , require('./routes/auth'))
+
 
 app.use((req , res) => {
     console.log(`${req.method} , ${req.url} not found`)
@@ -17,5 +19,5 @@ app.use((req , res) => {
 app.use(errorHandler)
 
 app.listen(PORT , () => {
-    console.log(`server running at https://localhost:${PORT}/`)
+    console.log(`server running at http://localhost:${PORT}/`)
 })
