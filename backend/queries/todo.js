@@ -47,16 +47,21 @@ const getTodo = async (req , res) => {
     try {
         const userId = req.user.userId ; 
         const {category , is_completed} = req.query ; 
-        let result  ;
+        let queryText = 'SELECT * FROM todos WHERE user_id = $1' ;
+        let queryParams = [userId] ; 
 
         if(category) {
-            result = await pool.query('SELECT * FROM todos WHERE category = $1 AND user_id = $2 ORDER BY created_at DESC' , [category , userId]) ; 
-        } else if (is_completed) {
-        result = await pool.query('SELECT * FROM todos WHERE is_completed = $1 AND user_id = $2 ORDER created_at BY DESC' , [is_completed , userId]) ; 
-        } else {
-            result = await pool.query('SELECT * FROM todos WHERE user_id = $1' , [userId])
+            queryParams.push(category)
+            queryText += `AND category = $${queryParams.length} ` ; 
         }
 
+        if(is_completed) {
+            queryParams.params(is_completed === 'true') ;
+            queryText += `AND is_completed = $${queryParams.length} ` ; 
+        }
+
+        queryText += 'ORDER BY created_at DESC' ;
+        const result = await pool.query(queryText , queryParams) ;
         res.status(200).json({result : result.rows  })
 
     } catch(err ) {
