@@ -29,9 +29,7 @@ export function Login() {
             const token = response.data.token ; 
             const user = response.data.user ;
             localStorage.setItem('token' , token) ;
-            localStorage.setItem('user' , user)
-            console.log(token) ;
-            console.log(user)
+            localStorage.setItem('user' , JSON.stringify(user))
             navigate('/dashboard')
         } catch(error) {
             if(axios.isAxiosError(error)) {
