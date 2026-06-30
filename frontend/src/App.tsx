@@ -1,6 +1,7 @@
 import { Route , Routes } from 'react-router'
 import Register from './Register' ;
 import { Login } from './Login';
+import Dashboard from './Dashboard';
 import './App.css'
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
     <Routes>
       <Route path='/' element={<Register />} />
       <Route path='/login' element={<Login />} />
-      <Route path='/dashboard' element={<div> welcome</div>} />
+      <Route path='/dashboard' element={<Dashboard />} />
     </Routes>
 
     </>
