@@ -45,28 +45,32 @@ const deleteTodo = async (req , res) => {
 
 const getTodo = async (req , res) => {
     try {
-        const userId = req.user.userId ; 
-        const {category , is_completed} = req.query ; 
-        let queryText = 'SELECT * FROM todos WHERE user_id = $1' ;
-        let queryParams = [userId] ; 
+        const userId = req.user.userId; 
+        const { category, is_completed } = req.query; 
 
-        if(category) {
-            queryParams.push(category)
-            queryText += `AND category = $${queryParams.length} ` ; 
+        let queryText = 'SELECT * FROM todos WHERE user_id = $1';
+        let queryParams = [userId];
+
+        // Ensure category exists, is a valid string, and isn't empty
+        if (category && typeof category === 'string' && category.trim() !== '') {
+            queryParams.push(category);
+            queryText += ` AND category = $${queryParams.length}`;
         }
 
-        if(is_completed) {
-            queryParams.params(is_completed === 'true') ;
-            queryText += `AND is_completed = $${queryParams.length} ` ; 
+        // Only parse is_completed if it is explicitly passed as a string from the frontend
+        if (is_completed !== undefined && is_completed !== null && is_completed !== '') {
+            queryParams.push(is_completed === 'true'); 
+            queryText += ` AND is_completed = $${queryParams.length}`;
         }
 
-        queryText += 'ORDER BY created_at DESC' ;
-        const result = await pool.query(queryText , queryParams) ;
-        res.status(200).json({result : result.rows  })
+        queryText += ' ORDER BY created_at DESC';
 
-    } catch(err ) {
-        handleDbError(err , res)
+        const result = await pool.query(queryText, queryParams);
+        res.status(200).json({ result : result.rows });
+
+    } catch(err) {
+        handleDbError(err , res);
     }
-}
+};
 
 module.exports = {createTodo , updateTodo , deleteTodo , getTodo}

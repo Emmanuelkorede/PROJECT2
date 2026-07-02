@@ -7,27 +7,35 @@ type PayloadObject  = {
     category : string
 }
 type NotePayload = {
-    title : string ; 
-    content? : string ; 
-    category : string
+    id: number;          // Added database primary key
+    user_id: number;
+    title: string; 
+    content?: string; 
+    category: string;
+    is_completed: boolean; // Added completion state flag
+    created_at: string;
 
 }
 
 export default function Dashboard() {
-    const data  = localStorage.getItem('user') ;
-    const name  : string = data.name
+    const userString  = localStorage.getItem('user') ;
+    const storedstring = JSON.parse(userString || '{}') ; 
+    const name = storedstring.name
     const [openModal , setOpenModal] = useState(false) ;
     const[title , setTitle] = useState('') ; 
     const[content , setContent] = useState('') ; 
-    const[category , setCategoryy] = useState('') ; 
+    const[category , setCategoryy] = useState('Work') ; 
     const [loading , setLoading] = useState(false) ;
     const [message , setMessage] = useState('') ;
-    const[todos , setTodos] = useState<NotePayload[]>([])
+    const[todos , setTodos] = useState<NotePayload[]>([]) ;
+
+
 
     const getAuthHeader =  () => {
         const token = localStorage.getItem('token') ; 
-        return { headers :{Authorizaiton : `Bearer ${token}`} };
+      return   {headers: {  Authorization: `Bearer ${token}` } };
     }
+
     const getNote = async () => {
         try {
             const response = await axios.get('http://localhost:3000/todo/' , getAuthHeader());
@@ -48,12 +56,13 @@ export default function Dashboard() {
             setMessage('please input your title') ; 
             return
         }
+        
         setLoading(true) ; 
         const payload : PayloadObject = {title , content , category} ;
         try {
             const response = await axios.post('http://localhost:3000/todo/' ,  payload , getAuthHeader() ) ;
             setMessage(response.data.message) ;
-
+            getNote() ;
         } catch(error) {
             if(axios.isAxiosError(error)) {
                 setMessage(error.response?.data?.message) ; 
@@ -71,7 +80,7 @@ export default function Dashboard() {
     
     return (
         <div className="bg-slate-100 min-h-screen  ">
-        <header className="flex justity-between  items-center border-b-2  border-gray-300 p-2">
+        <header className="flex w-full justity-between  items-center border-b-2  border-gray-300 p-2">
             <div>
                 <h2 className="text-xl font-semibold text-slate-800">Welcome {name}</h2>
             </div>
@@ -97,14 +106,16 @@ export default function Dashboard() {
                     </select>
                 </div>
                 {message && <p>{message}</p>}
-                <button className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4"  onClick={createTodo}>{loading ? 'Creating...' : 'Create Todo' }</button>
+                <button className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4"  onClick={createTodo} >{loading ? 'Creating...' : 'Create Todo' }</button>
             </div>
             <div className="bg-white flex-1 rounded-xl shadow-md py-4 px-7 flex flex-col gap-4">
                 <h3>Your Todos</h3>
 
                 {todos.map((todo) => (
                     <div key={todo.id}>
-
+                    <h1>{todo.title}</h1>
+                    <p>{todo.content}</p>
+                    <p>{todo.category}</p>
                     </div>
                 ))}
 
