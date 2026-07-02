@@ -109,15 +109,21 @@ export default function Dashboard() {
                 <button className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4"  onClick={createTodo} >{loading ? 'Creating...' : 'Create Todo' }</button>
             </div>
             <div className="bg-white flex-1 rounded-xl shadow-md py-4 px-7 flex flex-col gap-4">
-                <h3>Your Todos</h3>
-
-                {todos.map((todo) => (
-                    <div key={todo.id}>
-                    <h1>{todo.title}</h1>
-                    <p>{todo.content}</p>
-                    <p>{todo.category}</p>
-                    </div>
-                ))}
+                <h3 className="text-xl font-bold text-slate-800 text-center mb-4">Your Todos</h3>
+                <div className=" grid grid-cols-2 gap-2"> 
+                    {todos.map((todo) => (
+                        <div key={todo.id} className="flex flex-col gap-2 bg-slate-100 rounded-lg p-2">
+                             <span className="rounded-2xl p-1 text-blue-800 bg-blue-500">{todo.category}</span>
+                            
+                            <h1 className="text-md font-semibold text-slate-800">{todo.title}</h1>
+                            <p className="bg-white rounded-lg p-2 font-medium text-slate-500">{todo.content}</p>
+                            <div className="flex gap-2">
+                                <button className="px-3 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4">Update</button>
+                                <button className="px-3 py-2 text-white bg-red-500 hover:bg-red-600 font-semibold w-full rounded-lg mt-4">Delete</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
             </div>
         </main>
