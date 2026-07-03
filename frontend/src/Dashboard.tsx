@@ -17,6 +17,8 @@ type NotePayload = {
 
 }
 
+type UpdatePayload = Pick<NotePayload , "title" | "content" |"is_completed">
+
 export default function Dashboard() {
     const userString  = localStorage.getItem('user') ;
     const storedstring = JSON.parse(userString || '{}') ; 
@@ -28,7 +30,10 @@ export default function Dashboard() {
     const [loading , setLoading] = useState(false) ;
     const [message , setMessage] = useState('') ;
     const[todos , setTodos] = useState<NotePayload[]>([]) ;
-
+    const [editingId , setEditingId] = useState<number | null >(null); 
+    const [editedT ,     setEditedT] = useState('') ;
+    const [editedC , setEditedC] = useState('') ;
+    const[eIs_com , setEIs_com] = useState(false) ;
 
 
     const getAuthHeader =  () => {
@@ -74,9 +79,49 @@ export default function Dashboard() {
         }
     }
 
+    const deleteTodo = async ( id : number) => {
+        try {
+            const response = await axios.delete( `http://localhost:3000/todo/${id}`, getAuthHeader()) ; 
+            setMessage( response.data.message) ; 
+            getNote()
+        } catch(error) {
+            if(axios.isAxiosError(error)) {
+                setMessage(error.response?.data?.message) ; 
+            } else {
+                setMessage('something went wrong')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
     useEffect(() => {
         getNote()
-    } , [])
+    } , []) ; 
+
+    const saveEdited = async (id : number) => {
+        const payload : UpdatePayload = {title : editedT ,content :  editedC , is_completed : eIs_com}
+        try {
+            const response = await axios.put(`http://localhost:3000/todo/${id}`, payload , getAuthHeader()) ;
+            setMessage( response.data.message) ; 
+            getNote() ; 
+            setEditingId(null)
+        } catch(error) {
+            if(axios.isAxiosError(error)) {
+                setMessage(error.response?.data?.message) ; 
+            } else {
+                setMessage('something went wrong')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const startEditing = (todo : NotePayload) => {
+        setEditingId(todo.id) ;
+        setEditedT(todo.title);
+        setEditedC(todo.content || '');
+    }
     
     return (
         <div className="bg-slate-100 min-h-screen  ">
@@ -113,14 +158,39 @@ export default function Dashboard() {
                 <div className=" grid grid-cols-2 gap-2"> 
                     {todos.map((todo) => (
                         <div key={todo.id} className="flex flex-col gap-2 bg-slate-100 rounded-lg p-2">
-                             <span className="rounded-2xl p-1 text-blue-800 bg-blue-500">{todo.category}</span>
+                            {editingId === todo.id ?
+                             <>
+                            <span className="ml-auto rounded-2xl text-xs py-1 px-3 text-blue-800 bg-blue-500 font-semibold">editing</span>
+                            
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="title" className="uppercase text-slate-600 tracking-wider font-semibold ">Title</label>
+                                <input className="px-4 py-2 border border-gray-200 outline-none focus:border-blue-500 rounded-lg bg-white" type="text" id="title" value={editedT} onChange={(e) => setEditedT(e.target.value)} />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="content" className="uppercase text-slate-600 tracking-wider font-semibold ">Content</label>
+                                <input type="text" className="px-4 py-2 border border-gray-200 outline-none focus:border-blue-500 rounded-lg bg-white" id="content" value={editedC} onChange={(e) => setEditedC(e.target.value)} />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <button onClick={() => setEIs_com(true)}>Mark as Completed</button>
+                            </div>
+                            <div className="flex gap-2">
+                                <button className="px-3 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4" onClick={() => saveEdited(todo.id)}>Save</button>
+                            <button className="px-3 py-2 text-white bg-red-500 hover:bg-red-600 font-semibold w-full rounded-lg mt-4" onClick={() => setEditingId(null)}>Cancel</button>
+                            </div>
+                             </> 
+                             : 
+                             <>
+                            <span className="ml-auto rounded-2xl text-xs py-1 px-3 text-blue-800 bg-blue-500 font-semibold">{todo.category}</span>
                             
                             <h1 className="text-md font-semibold text-slate-800">{todo.title}</h1>
                             <p className="bg-white rounded-lg p-2 font-medium text-slate-500">{todo.content}</p>
                             <div className="flex gap-2">
-                                <button className="px-3 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4">Update</button>
-                                <button className="px-3 py-2 text-white bg-red-500 hover:bg-red-600 font-semibold w-full rounded-lg mt-4">Delete</button>
+                                <button className="px-3 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4" onClick={() => startEditing(todo) }>Update</button>
+                            <button className="px-3 py-2 text-white bg-red-500 hover:bg-red-600 font-semibold w-full rounded-lg mt-4" onClick={() => deleteTodo(todo.id)}>Delete</button>
                             </div>
+                             </>
+                             }
+
                         </div>
                     ))}
                 </div>
