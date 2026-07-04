@@ -37,6 +37,9 @@ export default function Dashboard() {
     const[eIs_com , setEIs_com] = useState(false) ;
     const navigate = useNavigate() ; 
 
+    const[statusQuery , setStatusQuery] = useState('') ;
+    const[stateQuery , setStateQuery] = useState('') ;
+
 
     const getAuthHeader =  () => {
         const token = localStorage.getItem('token') ; 
@@ -45,7 +48,13 @@ export default function Dashboard() {
 
     const getNote = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/todo/' , getAuthHeader());
+            const params = new  URLSearchParams ;
+            if(stateQuery) params.append('is_completed' , stateQuery) ;
+            if(statusQuery) params.append('category' , statusQuery) ;
+
+            const url  = `http://localhost:3000/todo/?${params.toString()}`
+
+            const response = await axios.get(url, getAuthHeader());
             setTodos(response.data.result || []) ;
         }  catch(error) {
             if(axios.isAxiosError(error)) {
@@ -107,7 +116,24 @@ export default function Dashboard() {
 
     useEffect(() => {
         getNote()
-    } , []) ; 
+    } , [stateQuery , statusQuery]) ; 
+
+    const markASComplete = async (id : number , is_completed : boolean) => {
+        try {
+            const response = await axios.patch( `http://localhost:3000/todo/${id}`, {is_completed}, getAuthHeader()) ; 
+            setMessage(response.data.message) ; 
+            getNote()
+        } catch(error) {
+            if(axios.isAxiosError(error)) {
+                setMessage(error.response?.data?.message) ; 
+            } else {
+                setMessage('something went wrong')
+            }
+        } finally {
+            setLoading(false) ;
+            
+        }
+    }
 
     const saveEdited = async (id : number) => {
         const payload : UpdatePayload = {title : editedT ,content :  editedC , is_completed : eIs_com}
@@ -123,7 +149,8 @@ export default function Dashboard() {
                 setMessage('something went wrong')
             }
         } finally {
-            setLoading(false)
+            setLoading(false) ; 
+        
         }
     }
 
@@ -166,7 +193,24 @@ export default function Dashboard() {
                 <button className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4"  onClick={createTodo} >{loading ? 'Creating...' : 'Create Todo' }</button>
             </div>
             <div className="bg-white flex-1 rounded-xl shadow-md py-4 px-7 flex flex-col gap-4">
-                <h3 className="text-xl font-bold text-slate-800 text-center mb-4">Your Todos</h3>
+                <div className="flex justify-between">
+                    <h3 className="text-xl font-bold text-slate-800 text-center mb-4">Your Todos</h3>
+                    <div className="flex  gap-2">
+                    
+                    <select id="category" value={statusQuery} onChange={(e) => setStatusQuery(e.target.value)} required>
+                        <option value="">All</option>
+                        <option value="Work">Work</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Shopping">Shopping</option>
+                    </select>
+
+                    <select id="category" value={stateQuery} onChange={(e) => setStateQuery(e.target.value)} required>
+                        <option value="">All Statuses</option>
+                        <option value="true">completed</option>
+                        <option value="false">Incomplete</option>
+                    </select>
+                </div>
+                </div>
                 <div className=" grid grid-cols-2 gap-2"> 
                     {todos.map((todo) => (
                         <div key={todo.id} className="flex flex-col gap-2 bg-slate-100 rounded-lg p-2">
@@ -198,8 +242,10 @@ export default function Dashboard() {
                              </> 
                              : 
                              <>
-                            <span className="ml-auto rounded-2xl text-xs py-1 px-3 text-blue-800 bg-blue-500 font-semibold">{todo.category}</span>
-                            
+                             <div className="flex justify-between">
+                                <span className=" rounded-2xl text-xs py-1 px-3 text-blue-800 bg-blue-500 font-semibold">{todo.category}</span>
+                                <button className={`rounded-2xl text-xs py-1 px-3 text-blue-800 ${ todo.is_completed === true ? 'bg-red-500' : 'bg-blue-500'} font-semibold`} onClick={() => markASComplete(todo.id , todo.is_completed)}>{todo.is_completed === true ? 'Completed' : 'Incomplete'}</button>
+                             </div>
                             <h1 className="text-md font-semibold text-slate-800">{todo.title}</h1>
                             <p className="bg-white rounded-lg p-2 font-medium text-slate-500">{todo.content}</p>
                             <div className="flex gap-2">

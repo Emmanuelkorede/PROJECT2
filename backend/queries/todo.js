@@ -68,13 +68,11 @@ const getTodo = async (req , res) => {
         let queryText = 'SELECT * FROM todos WHERE user_id = $1';
         let queryParams = [userId];
 
-        // Ensure category exists, is a valid string, and isn't empty
         if (category && typeof category === 'string' && category.trim() !== '') {
             queryParams.push(category);
             queryText += ` AND category = $${queryParams.length}`;
         }
 
-        // Only parse is_completed if it is explicitly passed as a string from the frontend
         if (is_completed !== undefined && is_completed !== null && is_completed !== '') {
             queryParams.push(is_completed === 'true'); 
             queryText += ` AND is_completed = $${queryParams.length}`;
