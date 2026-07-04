@@ -2,7 +2,7 @@ const express = require('express') ;
 const router = express.Router() ;
 const validate = require('../middleware/validate')  ;
 const authMiddleware = require('../middleware/auth') ; 
-const {createTodo , updateTodo ,  deleteTodo , getTodo} = require('../queries/todo') ;
+const {createTodo , updateTodo ,  deleteTodo , getTodo , markAsComplete} = require('../queries/todo') ;
 
 const createRules = [
     { field : 'title',  required : true , type : 'string'  }, 
@@ -19,6 +19,7 @@ const updateRules = [
 
 router.post('/'  ,authMiddleware , validate(createRules) , createTodo)
 router.put('/:id' ,authMiddleware , validate(updateRules) , updateTodo) ;
+router.patch('/:id' , authMiddleware , markAsComplete)
 router.delete('/:id' , authMiddleware ,deleteTodo) ;
 router.get('/' , authMiddleware  , getTodo)
 

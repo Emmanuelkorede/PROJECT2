@@ -27,7 +27,7 @@ export default function Dashboard() {
     const [openModal , setOpenModal] = useState(false) ;
     const[title , setTitle] = useState('') ; 
     const[content , setContent] = useState('') ; 
-    const[category , setCategoryy] = useState('Work') ; 
+    const[category , setCategoryy] = useState('') ; 
     const [loading , setLoading] = useState(false) ;
     const [message , setMessage] = useState('') ;
     const[todos , setTodos] = useState<NotePayload[]>([]) ;
@@ -63,6 +63,11 @@ export default function Dashboard() {
             setMessage('please input your title') ; 
             return
         }
+
+        if(category === "") {
+            setMessage('Please select a category') ;
+            return ;
+        }
         
         setLoading(true) ; 
         const payload : PayloadObject = {title , content , category} ;
@@ -77,7 +82,10 @@ export default function Dashboard() {
                 setMessage('something went wrong')
             }
         } finally {
-            setLoading(false)
+            setLoading(false) ;
+            setTitle('') ;
+            setContent('')
+            setMessage('') ;
         }
     }
 
@@ -147,7 +155,8 @@ export default function Dashboard() {
                 </div>
                 <div className="flex flex-col gap-2">
                     <label htmlFor="options" className="uppercase text-slate-600 tracking-wider font-semibold " >Choose a category</label>
-                    <select id="options" value={category} onChange={(e) => setCategoryy(e.target.value)}>
+                    <select id="options" value={category} onChange={(e) => setCategoryy(e.target.value)} required>
+                        <option value="">Please choose a category</option>
                         <option value="Work">Work</option>
                         <option value="Personal">Personal</option>
                         <option value="Shopping">Shopping</option>

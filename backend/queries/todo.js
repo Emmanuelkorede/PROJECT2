@@ -27,6 +27,23 @@ const updateTodo = async (req , res) => {
     }
 }
 
+const markAsComplete = async (req , res) => {
+     try {
+        const userId = req.user.userId ; 
+        const {id} = req.params
+        const {is_completed } = req.body ; 
+        const result = await pool.query('UPDATE todos SET is_completed=$1 WHERE id = $2 AND user_id = $3 RETURNING * ' , [!is_completed , id , userId]) ; 
+        if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Todo item not found or unauthorized' });
+         }
+
+        res.status(200).json({message : 'updated successfully ' , result : result.rows[0]})
+
+     } catch(err ) {
+        handleDbError(err , res)
+    }
+}
+
 const deleteTodo = async (req , res) => {
         try {
         const userId = req.user.userId ; 
@@ -73,4 +90,4 @@ const getTodo = async (req , res) => {
     }
 };
 
-module.exports = {createTodo , updateTodo , deleteTodo , getTodo}
+module.exports = {createTodo , updateTodo , deleteTodo , getTodo , markAsComplete}
