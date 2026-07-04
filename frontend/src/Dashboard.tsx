@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "axios" ; 
+import { useNavigate } from "react-router";
 
 type PayloadObject  = {
     title : string ; 
@@ -7,12 +8,12 @@ type PayloadObject  = {
     category : string
 }
 type NotePayload = {
-    id: number;          // Added database primary key
+    id: number;          
     user_id: number;
     title: string; 
     content?: string; 
     category: string;
-    is_completed: boolean; // Added completion state flag
+    is_completed: boolean; 
     created_at: string;
 
 }
@@ -34,6 +35,7 @@ export default function Dashboard() {
     const [editedT ,     setEditedT] = useState('') ;
     const [editedC , setEditedC] = useState('') ;
     const[eIs_com , setEIs_com] = useState(false) ;
+    const navigate = useNavigate() ; 
 
 
     const getAuthHeader =  () => {
@@ -121,6 +123,7 @@ export default function Dashboard() {
         setEditingId(todo.id) ;
         setEditedT(todo.title);
         setEditedC(todo.content || '');
+        setEIs_com(todo.is_completed)
     }
     
     return (
@@ -129,7 +132,7 @@ export default function Dashboard() {
             <div>
                 <h2 className="text-xl font-semibold text-slate-800">Welcome {name}</h2>
             </div>
-            <button onClick={() => setOpenModal(true)} className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold">Log out </button>
+            <button onClick={() => {setOpenModal(true) ;  navigate('/login') }} className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold">Log out </button>
         </header>
         <main className="flex  gap-4 m-6 items-center justify-center" >
             <div className="bg-white max-w-md w-full rounded-xl shadow-md py-8 px-7 flex flex-col gap-4">
@@ -170,8 +173,14 @@ export default function Dashboard() {
                                 <label htmlFor="content" className="uppercase text-slate-600 tracking-wider font-semibold ">Content</label>
                                 <input type="text" className="px-4 py-2 border border-gray-200 outline-none focus:border-blue-500 rounded-lg bg-white" id="content" value={editedC} onChange={(e) => setEditedC(e.target.value)} />
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <button onClick={() => setEIs_com(true)}>Mark as Completed</button>
+                            <div className="flex flex-col gap-2 ">
+                                <button onClick={() => {
+                                    if(eIs_com === true) {
+                                        setEIs_com(false)
+                                    } else {
+                                        setEIs_com(true)
+                                    }
+                                }} className={`px-3 py-2 text-white ${eIs_com === true ? 'bg-red-500' : 'bg-blue-500'}  font-semibold w-full rounded-lg mt-4`}>Mark as {eIs_com === true ? 'in complete' : 'Completed'} </button>
                             </div>
                             <div className="flex gap-2">
                                 <button className="px-3 py-2 text-white bg-blue-500 hover:bg-blue-800 font-semibold w-full rounded-lg mt-4" onClick={() => saveEdited(todo.id)}>Save</button>
