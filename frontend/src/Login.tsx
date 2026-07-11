@@ -83,7 +83,7 @@ export function Login() {
                 </button>
 
                 <div className="text-center mt-2 text-sm text-slate-600">
-                    <p>Don't have an account? <Link to="/register" className="underline text-blue-500 hover:text-blue-600">Sign up</Link></p>
+                    <p>Don't have an account? <Link to="/" className="underline text-blue-500 hover:text-blue-600">Sign up</Link></p>
                 </div>
             </form>
         </div>
